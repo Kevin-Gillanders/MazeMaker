@@ -1,0 +1,115 @@
+<html>
+<body>
+    <style>
+        #myCanvas{
+            border: solid 1px black;
+        }
+    </style>
+</body>
+
+<canvas id="myCanvas" width="800" height="600" style="border:1px solid #d3d3d3;">
+Your browser does not support the HTML5 canvas tag.</canvas>
+
+
+<script>
+    class Cell
+    {
+
+
+        constructor(x, y)
+        {
+
+            this.x = x;
+            this.y = y;
+            this.leftWall = Math.random() >= 0.5;
+            this.topWall = Math.random() >= 0.5;
+        }
+
+        xC()
+        {
+            console.log("xcoor : " + this.x);
+            return this.x;
+        }
+
+        yC()
+        {
+            console.log("ycoor : " + this.y);
+            return this.y;
+        }
+
+        draw()
+        {
+            var xCor = this.xC();
+            var yCor = this.yC();
+
+            ctx.moveTo(xCor, yCor);
+            // Something very wrong with ordering
+            if(this.leftWall)
+                ctx.lineTo(xCor, yCor + cellSize);
+            ctx.moveTo(xCor, yCor + cellSize);
+
+            if(this.bottomWall)
+                ctx.lineTo(xCor + cellSize, yCor + cellSize );
+            ctx.moveTo(xCor + cellSize, yCor + cellSize);
+
+            if(this.rightWall)
+                ctx.lineTo(xCor + cellSize, yCor);
+            ctx.moveTo(xCor + cellSize, yCor);
+
+            if(this.topWall)
+                ctx.lineTo(xCor, yCor);
+
+            // ctx.lineTo(xCor - 99, yCor);
+            ctx.stroke();
+        }
+
+    }
+
+    var c = document.getElementById("myCanvas");
+    var ctx = c.getContext("2d");
+    var cellSize = 100;
+
+    ctx.fillStyle = "LightGreen";
+    ctx.fillRect(0, 0, cellSize, cellSize);
+
+    ctx.stroke();
+
+
+    ctx.fillStyle = "lightcoral";
+    ctx.fillRect(myCanvas.width - cellSize, myCanvas.height - cellSize, cellSize, cellSize);
+    ctx.stroke();
+
+
+    var cells = [];
+
+    for(var width = 0; width <= myCanvas.width; width += cellSize )
+    {
+        console.log("Width : " + width);
+        for(var height = 0; height <= myCanvas.height; height += cellSize )
+        {
+            console.log("Height : " + height);
+            cells.push(new Cell(width, height));
+        }
+    }
+    for(var x = 0; x < cells.length; x++)
+    {
+        cells[x].draw();
+    }
+
+    // for(var height = 0; height <= myCanvas.height; height += 50 )
+    // {
+    //     console.log("Width : " + width);
+    //     for(var width = 0; width <= myCanvas.width; width += 50 )
+    //     {
+    //         console.log("Height : " + height);
+    //         ctx.moveTo(width,height);
+    //         ctx.lineTo(width + 49,height);
+    //     }
+    // }
+    // ctx.stroke();
+
+</script>
+
+
+</body>
+</html>
