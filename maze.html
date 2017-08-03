@@ -1,13 +1,13 @@
 <html>
 <body>
-    <style>
-        #myCanvas{
-            border: solid 1px black;
-        }
-    </style>
+    // <style>
+        // #myCanvas{
+            // border: solid 1px black;
+        // }
+    // </style>
 </body>
 
-<canvas id="myCanvas" width="800" height="600" style="border:1px solid #d3d3d3;">
+<canvas id="myCanvas" width="800" height="600" style="border:1px solid Black;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
 
@@ -35,6 +35,8 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
             this.x = x;
             this.y = y;
+			this.visited = false;
+			
             this.leftWall = true;// Math.random() >= 0.5;
             this.topWall = true;// Math.random() >= 0.5;
 			this.rightWall = true;// Math.random() >= 0.5;
@@ -69,6 +71,28 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 		removeBottomWall()
 		{
 			this.bottomWall = false;
+		}		
+		
+		getVisited()
+		{
+			return this.visited;
+		}
+		
+		setVisited()
+		{
+			this.visited = true;
+		}
+		
+		visit()
+		{
+			if(this.getVisited())
+			{
+				return true;
+			}
+			else
+			{	this.setVisited();
+				return false;
+			}
 		}
 		
         draw()
@@ -95,6 +119,8 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
             ctx.closePath();
             ctx.stroke();
+			// ctx.fillStyle = "red";
+            // ctx.fill();
         }
 
     }
@@ -112,6 +138,40 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 
 	
 	
+	
+	
+	function visited(cells, x, y)
+	{
+		return cells[x][y].visit();
+	}
+	
+	function visitedNeighbours(cells, x, y)
+	{
+		//FIXME This may throw errors when one of the cells is next to an edge 
+		//			right							left							down						up
+		return [cells[x + 1][y].getVisited(), cells[x - 1][y].getVisited(), cells[x][y + 1].getVisited(), cells[x][y - 1].getVisited()];
+	}
+	
+	function huntAndSeek(cells)
+	{
+		// TODO Make array which is a list of cells which hasn't been visited
+		// More effecient than selecting x and y at random
+		var randX = Math.floor(Math.random()*cells.length());
+		var randY = Math.floor(Math.random()*cells[0].length());
+		
+		
+		if(!(visited(cells, randX, randY)))
+		{
+			// Select random neighbours
+			// TODO find way to programatically  remove shared wall
+			var neighbours = visitedNeighbours(cells, randX, randY)
+			var rand = Math.floor(Math.random()*4);
+			
+			// TODO remove__Wall returns coordinates, pass this back into algorithm recursively?
+		}
+	}
+	
+	
     var c = document.getElementById("myCanvas");
     var ctx = c.getContext("2d");
     var cellSize = 100;
@@ -122,10 +182,10 @@ Your browser does not support the HTML5 canvas tag.</canvas>
     var cells = [];
 
     var count = 0;
-    for(var width = 0; width <= myCanvas.width; width += cellSize )
+    for(var width = 0; width < myCanvas.width; width += cellSize )
     {
 		cells.push([])
-		for(var height = 0; height <= myCanvas.height; height += cellSize )
+		for(var height = 0; height < myCanvas.height; height += cellSize )
         {
             cells[count].push(new Cell(width, height));
         }
@@ -142,40 +202,20 @@ Your browser does not support the HTML5 canvas tag.</canvas>
     {
 		for(var y = 0; y < cells[x].length; y++)
 		{
-			console.log("x : " + x + " y : " + y);
+			// console.log("x : " + x + " y : " + y);
 			
-			var rand = Math.ceil(Math.random()*4);
-			console.log(rand);
+			var rand = Math.ceil(Math.random()*5);
+			// console.log(rand);
 			// if(x == 3)
 			// {
 				// cells[x][y].removeLeftWall();
 				// cells[x - 1][y].removeRightWall();
 			// }
 
-
-			// Right wall and bottom wall can be removed
-			// Top wall and left wall work
-			// This is a bounding issue
-			if( x - 1 > 0 && rand == 4)
-			{
-				cells[x][y].removeLeftWall();
-				cells[x - 1][y].removeRightWall();
-			}
-			else if( x + 1 < cells.length && rand == 2)
-			{
-				cells[x][y].removeRightWall();
-				cells[x + 1][y].removeLeftWall();
-			}
-			else if( y - 1 > 0 && rand == 1)
-			{
-				cells[x][y].removeTopWall();
-				cells[x][y - 1].removeBottomWall();
-			}
-			else if( y + 1 < cells[x].length && rand == 3)
-			{
-				cells[x][y].removeBottomWall();
-				cells[x][y + 1].removeTopWall();
-			}
+			
+			// console.log(removeLeftWall(cells, x, y));
+			// console.log(visited(cells, x, y));
+			removeRandomWall(cells, x, y);
 			
 			// if( x - 1 >= 0)
 				// console.log("Neighbour x - 1 : " + (x - 1) + " y : " + y);
@@ -186,6 +226,7 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 			// if( y + 1 < cells[x].length)
 				// console.log("Neighbour x - 1 : " + x + " y : " + (y + 1));
 		}
+		console.log("+ ---------------------------------------------+ ");
 	}
 	
 	ctx.clearRect(0, 0, myCanvas.width, myCanvas.height);
@@ -198,10 +239,74 @@ Your browser does not support the HTML5 canvas tag.</canvas>
 		for(var y = 0; y < cells[x].length; y++)
 		{
 			cells[x][y].draw();
-			console.log("argh");
+			// console.log("argh");
 		}
 	}
 
+	
+	
+	function removeLeftWall(cells, x, y)
+	{
+		if( x - 1 >= 0)
+		{
+			cells[x][y].removeLeftWall();
+			cells[x - 1][y].removeRightWall();
+			
+			return [x - 1, y];
+		}
+		return [-1, -1];
+	}
+
+	function removeRightWall(cells, x, y)
+	{
+		
+		if( x < cells[0].length)
+		{
+			cells[x][y].removeRightWall();
+			cells[x + 1][y].removeLeftWall();
+			return [x + 1, y];
+		}
+		return [-1, -1];
+	}
+	
+	function removeTopWall(cells, x, y)
+	{
+		if( y - 1 >= 0)
+		{
+			cells[x][y].removeTopWall();
+			cells[x][y - 1].removeBottomWall();
+			return [x, y - 1];
+		}
+		return [-1, -1];
+			
+	}
+	
+	function removeBottomWall(cells, x, y)
+	{
+		if( y + 1 < cells[x].length)
+		{
+			cells[x][y].removeBottomWall();
+			cells[x][y + 1].removeTopWall();
+			return [x, y + 1];
+		}
+		return [-1, -1];
+	}
+	
+	function removeRandomWall(cells, x, y)
+	{
+		var rand = Math.ceil(Math.random()*4);
+		
+		if(rand == 5)
+			return
+		else if(rand == 1)
+			removeTopWall(cells, x, y)
+		else if(rand == 2)
+			removeRightWall(cells, x, y)
+		else if(rand == 3)
+			removeBottomWall(cells, x, y)
+		else if(rand == 4)
+			removeLeftWall(cells, x, y)
+	}
 
 </script>
 
